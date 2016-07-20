@@ -101,9 +101,13 @@ function showAggregate() {
   image(img, 0, 0);
 }
 
+function showNextImage() {
+  image(imgs[curImgIndex], IMAGE_WIDTH, 0);
+}
+
 function setup() {
   // Create the Canvas
-  var cnv = createCanvas(IMAGE_WIDTH, IMAGE_HEIGHT);
+  var cnv = createCanvas(IMAGE_WIDTH*2, IMAGE_HEIGHT);
   cnv.parent('sketch');
 }
 
@@ -111,7 +115,7 @@ var addSequence = [1,1,1,1,1,1,1,1,1,1,2,4,8,16,32,32,32,32,32,32,32,32,32,32,32
 var seqIndex = 0;
 
 function keyPressed() {
-  var numToAdd = addSequence[seqIndex];
+  var numToAdd = 1; //addSequence[seqIndex];
   for(var i=0; i<numToAdd; i++) {
     addNextImageToAggregate();
   }
@@ -122,4 +126,5 @@ function keyPressed() {
 function draw() {
   noLoop();
   showAggregate();
+  showNextImage();
 }
