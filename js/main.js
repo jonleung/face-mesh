@@ -59,9 +59,7 @@ function addToPixelsTotalArray(img) {
 var curImgIndex = 0;
 var imgsAdded = 0;
 
-function addNextImage() {
-  clear();
-
+function addNextImageToAggregate() {
   if (curImgIndex < NUM_IMAGES)
   // Add The Image To the Pixel Total Array
   do {
@@ -74,7 +72,9 @@ function addNextImage() {
 
     curImgIndex++;
   } while (successfullyAdded === false);
+}
 
+function showAggregate() {
   var averagedPixelsArray = $.extend(true, [], pixelsTotalArray);
 
   // Average The Pixel Array
@@ -99,14 +99,27 @@ function addNextImage() {
 
   img.updatePixels();
   image(img, 0, 0);
-
-  setTimeout(addNextImage, 0);
 }
 
 function setup() {
   // Create the Canvas
   var cnv = createCanvas(IMAGE_WIDTH, IMAGE_HEIGHT);
   cnv.parent('sketch');
+}
 
-  addNextImage();
+var addSequence = [1,1,1,1,1,1,1,1,1,1,2,4,8,16,32,64,128,256,512,1024];
+var seqIndex = 0;
+
+function keyPressed() {
+  var numToAdd = addSequence[seqIndex];
+  for(var i=0; i<numToAdd; i++) {
+    addNextImageToAggregate();
+  }
+  redraw()
+  seqIndex++;
+}
+
+function draw() {
+  noLoop();
+  showAggregate();
 }
