@@ -1,72 +1,88 @@
-var NUM_IMAGES = 2180;
+var NUM_IMAGES = 2000;
 var BASE_PATH = "photos"
 
 var IMAGE_WIDTH = 100;
 var IMAGE_HEIGHT = 100;
 
-var images = [];
-var imagePixels;
+var TIMEOUT = 0.1;
+
+var imgs;
+var pixelsTotalArray;
 
 function preload() {
   // Preload the Images
+  imgs = [];
+
   for (var counter = 1; counter <= NUM_IMAGES; counter++) {
+    var img = imgs[counter - 1];
     var imgPath = BASE_PATH + "/" + counter + ".jpg";
     var img = loadImage(imgPath);
-    images.push(img);
+    imgs.push(img);
   }
-}
-
-function setup() {
-  // Create the Canvas
-  var cnv = createCanvas(IMAGE_WIDTH, IMAGE_HEIGHT);
-  cnv.parent('sketch');
 
   // Initialize Empty Pixel Array For Total Pixels
-  var pixelsTotalArray = [];
+  pixelsTotalArray = [];
   for (var i = 0; i<IMAGE_HEIGHT*IMAGE_WIDTH; i++) {
     pixelsTotalArray[i] = {r: 0, g: 0, b: 0}
   }
+}
 
-  // Load Images Into Pixel Array
-  var imagesAdded = 0;
+function addToPixelsTotalArray(img) {
+  img.loadPixels();
 
-  for (var imageNum = 0; imageNum < images.length; imageNum++) {
-    var img = images[imageNum];
-    img.loadPixels();
+  if (img.width === 100 && img.height === 100) {
+    for (var i=0; i<pixelsTotalArray.length; i++) {
+      var destPixel = pixelsTotalArray[i];
 
-    if (img.width === 100 && img.height === 100) {
-      imagesAdded++;
+      for (var j=0; j<4; j++) {
+        var sourcePixel = img.pixels[i*4 + j];
 
-      imagePixels = img.pixels;
-
-      for (var i=0; i<pixelsTotalArray.length; i++) {
-        var destPixel = pixelsTotalArray[i];
-
-        for (var j=0; j<4; j++) {
-          var sourcePixel = img.pixels[i*4 + j];
-
-          if(j === 0) {
-            destPixel.r += sourcePixel;
-          }
-          else if(j === 1) {
-            destPixel.g += sourcePixel;
-          }
-          else if (j === 2) {
-            destPixel.b += sourcePixel;
-          }
+        if(j === 0) {
+          destPixel.r += sourcePixel;
+        }
+        else if(j === 1) {
+          destPixel.g += sourcePixel;
+        }
+        else if (j === 2) {
+          destPixel.b += sourcePixel;
         }
       }
     }
+
+    return true
   }
+  else {
+    return false;
+  }
+}
+
+var curImgIndex = 0;
+var imgsAdded = 0;
+
+function addNextImage() {
+  clear();
+
+  if (curImgIndex < NUM_IMAGES)
+  // Add The Image To the Pixel Total Array
+  do {
+    var img = imgs[curImgIndex];
+    var successfullyAdded = addToPixelsTotalArray(img);
+    if(successfullyAdded) {
+      imgsAdded++;
+      console.log(imgsAdded);
+    };
+
+    curImgIndex++;
+  } while (successfullyAdded === false);
+
+  var averagedPixelsArray = $.extend(true, [], pixelsTotalArray);
 
   // Average The Pixel Array
-  for (var i = 0; i<pixelsTotalArray.length; i++) {
-    var pixel = pixelsTotalArray[i];
-    pixel.r /= imagesAdded;
-    pixel.g /= imagesAdded;
-    pixel.b /= imagesAdded;
-  }
-  var averagedPixelsArray = pixelsTotalArray;
+  averagedPixelsArray.forEach(function(pixel) {
+    pixel.r /= imgsAdded;
+    pixel.g /= imgsAdded;
+    pixel.b /= imgsAdded;
+  })
 
   // Draw the Image
   img = createImage(IMAGE_WIDTH, IMAGE_HEIGHT);
@@ -83,4 +99,14 @@ function setup() {
 
   img.updatePixels();
   image(img, 0, 0);
+
+  setTimeout(addNextImage, 0);
+}
+
+function setup() {
+  // Create the Canvas
+  var cnv = createCanvas(IMAGE_WIDTH, IMAGE_HEIGHT);
+  cnv.parent('sketch');
+
+  addNextImage();
 }
